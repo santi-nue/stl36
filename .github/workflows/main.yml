@@ -1,0 +1,53 @@
+name: test
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-windows:
+    defaults:
+      run:
+        shell: bash
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+      - name: Set up python
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      - name: Load cached venv
+        id: cached-pip-wheels
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+      - name: Install library
+        run: poetry install --no-interaction
+      - run: |
+          source $VENV
+          # pytest --version
+      - name: Export requirements file from lock file
+        run: |
+          poetry export -f requirements.txt --output requirements.txt          
+      - name: Build the executable
+        run: |
+          poetry run pyoxidizer build
+      - name: Create zip of the build
+        run: |
+          python -c "import shutil; shutil.make_archive('release', 'zip', 'build/dist/')"
+      - uses: actions/upload-artifact@v3
+        with:
+          name: testnicegui
+          path: |
+            release.zip
