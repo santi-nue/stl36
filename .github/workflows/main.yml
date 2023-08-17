@@ -43,10 +43,9 @@ jobs:
 
       # This is from <https://github.com/python-poetry/poetry/blob/639d5e057/.github/workflows/main.yml#L57-L60>
       - name: Ensure cache is healthy
-        if: steps.poetry-cache.outputs.cache-hit == 'true'
         shell: bash
         run: |
-          timeout 10s poetry run pip --version || rm -rf .venv
+          rm -rf .venv
 
 
 
@@ -56,7 +55,8 @@ jobs:
       - name: Install library
         run: poetry install --no-interaction
       - run: |
-          source $VENV
+          source .venv/scripts/activate        
+
       - name: Export requirements file from lock file
         run: |
           poetry export -f requirements.txt --output requirements.txt          
