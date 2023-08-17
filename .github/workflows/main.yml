@@ -36,7 +36,6 @@ jobs:
         run: poetry install --no-interaction
       - run: |
           source $VENV
-          # pytest --version
       - name: Export requirements file from lock file
         run: |
           poetry export -f requirements.txt --output requirements.txt          
